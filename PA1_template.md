@@ -8,27 +8,44 @@ output:
 
 ## Loading and preprocessing the data
 * Load the data
-```{r}
+
+```r
 unzip("activity.zip")
 activity <- read.csv("activity.csv")
 ```
 * Process/transform the data (if necessary) into a format suitable for your analysis
-```{r echo=TRUE}
+
+```r
 steps.date <- aggregate(steps ~ date, data=activity, FUN=sum, na.rm=TRUE)
 ```
 
 ## What is mean total number of steps taken per day?
 1. Make a histogram of the total number of steps taken each day
 
-```{r}
+
+```r
 hist(steps.date$steps)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 2. Calculate and report the **mean** and **median** total number of
    steps taken per day
 
-```{r}
+
+```r
 mean(steps.date$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(steps.date$steps)
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
@@ -36,18 +53,26 @@ median(steps.date$steps)
    interval (x-axis) and the average number of steps taken, averaged
    across all days (y-axis)
 
-```{r}
+
+```r
 steps.interval <- aggregate(steps ~ interval, data=activity, FUN=mean)
 
 library(lattice)
 xyplot(steps ~ interval, steps.interval, type = "s",
     xlab = "Interval", ylab = "Number of steps")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 2. Which 5-minute interval, on average across all the days in the
    dataset, contains the maximum number of steps?
 
-```{r}
+
+```r
 steps.interval$interval[which.max(steps.interval$steps)]
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
@@ -55,8 +80,13 @@ steps.interval$interval[which.max(steps.interval$steps)]
 1. Calculate and report the total number of missing values in the
    dataset (i.e. the total number of rows with `NA`s)
 
-```{r}
+
+```r
 sum(is.na(activity))
+```
+
+```
+## [1] 2304
 ```
 2. Devise a strategy for filling in all of the missing values in the
    dataset. The strategy does not need to be sophisticated. For
@@ -69,7 +99,8 @@ values.
 3. Create a new dataset that is equal to the original dataset but with
    the missing data filled in.
 
-```{r}
+
+```r
 activity <- merge(activity, steps.interval, by="interval", suffixes=c("",".y"))
 nas <- is.na(activity$steps)
 activity$steps[nas] <- activity$steps.y[nas]
@@ -82,11 +113,28 @@ activity <- activity[,c(1:3)]
    the first part of the assignment? What is the impact of imputing
    missing data on the estimates of the total daily number of steps?
 
-```{r}
+
+```r
 steps.date <- aggregate(steps ~ date, data=activity, FUN=sum)
 barplot(steps.date$steps, names.arg=steps.date$date, xlab="date", ylab="steps", col=c("darkblue"))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+```r
 mean(steps.date$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(steps.date$steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 The impact of the missing data seems rather low, at least when
@@ -103,7 +151,8 @@ estimating the total number of steps per day.
    taken, averaged across all weekday days or weekend days
    (y-axis).
 
-```{r}
+
+```r
 day <- weekdays(as.Date(activity$date))
 daylevel <- vector()
 for (i in 1:nrow(activity)) {
@@ -124,3 +173,5 @@ library("lattice")
 xyplot(steps ~ interval | daylevel, stepsByDay, type = "l", layout = c(1, 2), 
     xlab = "Interval", ylab = "Number of steps")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
